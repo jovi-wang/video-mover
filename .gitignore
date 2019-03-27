@@ -1,0 +1,6 @@
+node_modules
+*.flv
+*.mp4
+*.avi
+*.aria2
+*.sbv

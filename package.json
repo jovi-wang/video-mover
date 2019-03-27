@@ -1,0 +1,27 @@
+{
+  "name": "video-mover",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://jovi-wang@github.com/jovi-wang/video-mover.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jovi-wang/video-mover/issues"
+  },
+  "homepage": "https://github.com/jovi-wang/video-mover#readme",
+  "devDependencies": {
+    "eslint-config-rallycoding": "^3.2.0"
+  },
+  "dependencies": {
+    "fast-xml-parser": "^3.12.16",
+    "puppeteer": "^1.13.0"
+  }
+}
