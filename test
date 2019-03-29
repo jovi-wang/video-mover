@@ -1,0 +1,118 @@
+const puppeteer = require('puppeteer');
+const { google } = require('googleapis');
+const fs = require('fs');
+
+const credentials = JSON.parse(fs.readFileSync('credentials.json'));
+const clientSecret = credentials.web.client_secret;
+const clientId = credentials.web.client_id;
+const redirectUrl = credentials.web.redirect_uris[0];
+const oauth2Client = new google.auth.OAuth2(clientId, clientSecret, redirectUrl);
+const SCOPES = [
+  'https://www.googleapis.com/auth/youtube.force-ssl',
+  'https://www.googleapis.com/auth/youtubepartner',
+  'https://www.googleapis.com/auth/youtube',
+  'https://www.googleapis.com/auth/youtube.upload',
+];
+const videoParams = {
+  part: 'snippet,status',
+  resource: {
+    snippet: {
+      categoryId: '22',
+      description: 'Description of uploaded video.',
+      title: 'Test video upload',
+    },
+    status: { privacyStatus: 'private' },
+  },
+  mediaFilename: 'sample_video.flv',
+  // properties: {
+  //   'snippet.categoryId': '22',
+  //   // 'snippet.defaultLanguage': '',
+  //   'snippet.description': 'Description of uploaded video.',
+  //   // 'snippet.tags[]': '',
+  //   'snippet.title': 'Test video upload',
+  //   // 'status.embeddable': '',
+  //   // 'status.license': '',
+  //   'status.privacyStatus': 'private',
+  //   // 'status.publicStatsViewable': '',
+  // },
+};
+const email_login = 'chicken.and.egg.is.a.problem@gmail.com';
+const login_password = 'chicken123!@#';
+
+const getTokenCode = async url => {
+  try {
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+
+    const navigationPromise = page.waitForNavigation();
+
+    await page.goto(url, {
+      waitUntil: 'networkidle2',
+    });
+    await page.screenshot({ path: 'mouse_click0.png' });
+
+    await page.waitForSelector(`#identifierId`);
+    await page.type(`#identifierId`, email_login, { delay: 100 });
+    await page.click('#identifierNext');
+    await navigationPromise;
+    // await Promise.all([page.waitForNavigation({ waitUntil: 'networkidle2' }), page.click('#identifierNext')]);
+    // await page.screenshot({ path: 'mouse_click1.png' });
+
+    await page.waitForSelector(`#password input[type="password"]`, { visible: true });
+    await page.type(`#password input[type="password"]`, login_password, { delay: 100 });
+    await page.click('#passwordNext');
+    await navigationPromise;
+    await page.screenshot({ path: 'mouse_click2.png' });
+
+    const cookies = await page.cookies();
+    await page.deleteCookie(...cookies);
+
+    let callbackUrl = page.target().url();
+    while (!(callbackUrl.includes('code') && callbackUrl.includes('http://localhost:23077/oauth2callback'))) {
+      await page.waitFor(2000);
+      callbackUrl = page.target().url();
+    }
+    await browser.close();
+    // console.log(callbackUrl);
+
+    // get code from callback url
+    const searchParams = new URLSearchParams(new URL(callbackUrl).search);
+    return searchParams.get('code');
+  } catch (err) {
+    console.log('error in getTokenCode');
+    throw err;
+  }
+};
+
+const videosInsert = (auth, params) =>
+  new Promise((resolve, reject) => {
+    const parameters = { part: params.part, auth, resource: params.resource };
+    parameters.media = { body: fs.createReadStream(params.mediaFilename) };
+    parameters.notifySubscribers = false;
+    // console.log(parameters);
+    const service = google.youtube('v3');
+    service.videos.insert(parameters, (err, data) => {
+      if (err) reject(err);
+      resolve(data);
+    });
+  });
+
+// exports.clickAuth =
+(async () => {
+  try {
+    const url = oauth2Client.generateAuthUrl({
+      // 'online' (default) or 'offline' (gets refresh_token)
+      access_type: 'offline',
+      scope: SCOPES,
+    });
+    const authorizationCode = await getTokenCode(url);
+    // console.log('authorizationCode', authorizationCode);
+    const { tokens } = await oauth2Client.getToken(authorizationCode);
+    oauth2Client.setCredentials(tokens);
+    const data = await videosInsert(oauth2Client, videoParams);
+    console.log('video data', data.data);
+  } catch (err) {
+    console.log('error in uploader file', err);
+    throw err;
+  }
+})();
