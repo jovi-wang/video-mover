@@ -22,6 +22,6 @@
   },
   "dependencies": {
     "fast-xml-parser": "^3.12.16",
-    "puppeteer": "^1.13.0"
+    "puppeteer": "^1.14.0"
   }
 }

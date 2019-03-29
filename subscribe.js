@@ -1,6 +1,6 @@
 const puppeteer = require('puppeteer');
 
-const gmail = 'xx';
+const gmail = 'xx@gmail.com';
 const gmailPassword = 'xx';
 
 // const domainName = 'https://www.ytpals.com';
@@ -14,7 +14,7 @@ const loginUrl = `${domainName}/network-v2/login-final.php?channelid=${channelId
 
 const googleLogin = async (browser) => {
   const page = await browser.newPage();
-  const navigationPromise = page.waitForNavigation();
+  const navigationPromise = page.waitForNavigation({ waitUntil: 'networkidle2' });
 
   await page.goto(googleLoginUrl, { waitUntil: 'networkidle2' });
 
@@ -27,7 +27,8 @@ const googleLogin = async (browser) => {
   await page.type('input[type=password]', gmailPassword);
   await page.click('span.snByac');
   await navigationPromise;
-  await page.goto('https://youtube.com');
+  await page.waitFor(() => document.URL.startsWith('https://myaccount.google.com'));
+  await page.goto('https://youtube.com', { waitUntil: 'networkidle2' });
   await navigationPromise;
 };
 (async () => {
@@ -40,32 +41,27 @@ const googleLogin = async (browser) => {
   });
   try {
     // await googleLogin(browser);
+    
     const page = await browser.newPage();
-    const navigationPromise = page.waitForNavigation();
-    await page.goto('https://youtube.com');
-    /*
+    const navigationPromise = page.waitForNavigation({ waitUntil: 'networkidle2' });
+    
     await page.goto(loginUrl, { waitUntil: 'networkidle2' });
     // const passwordInput = await page.waitForSelector('input[type=password]');
     // await passwordInput.type(password);
     await page.type('input[type=password]', password);
     await page.click('input[type=submit]');
     await navigationPromise;
+    await page.waitFor(() => document.URL.includes('members-area'));
+    // console.log(page.frames());
 
-
-    // const element = await page.waitForSelector('img#likeSub1');
-
-    await page.goto('https://www.subpals.com/network-v2/index.php', { waitUntil: 'networkidle2' });
-
+    await page.goto(`${domainName}/network-v2/index.php`, { waitUntil: 'networkidle2' });
     await navigationPromise;
-
-    await page.waitForSelector('a#likeSub2');
+    
     await page.evaluate(() => {
       const node = document.querySelector('a#likeSub2');
-      console.log(node);
       node.click();
+      return node;
     });
-*/
-    console.log(1);
   } catch (err) {
     console.log('ops', err);
   } finally {
