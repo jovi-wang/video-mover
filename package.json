@@ -21,7 +21,9 @@
     "eslint-config-rallycoding": "^3.2.0"
   },
   "dependencies": {
+    "@microlink/youtube-dl": "^1.13.2",
     "fast-xml-parser": "^3.12.16",
+    "node-ffmpeg": "0.0.0",
     "puppeteer": "^1.14.0"
   }
 }
