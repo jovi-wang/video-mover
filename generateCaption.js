@@ -2,6 +2,10 @@ const puppeteer = require('puppeteer');
 const parser = require('fast-xml-parser');
 const fs = require('fs');
 
+const aidList = [
+  55010811, 55996997
+];
+
 const format = milliseconds => {
   const date = new Date(null);
   date.setMilliseconds(milliseconds);
@@ -52,7 +56,8 @@ const generateCaptionFiles = async (browser, cidList) => {
           captionsArray.splice(i, 1);
         }
       }
-      const currentCaptionsList = fs.readdirSync(__dirname);
+      const directoryName = `${__dirname}/captions`;
+      const currentCaptionsList = fs.readdirSync(directoryName);
       captionsArray
         .map(i => ({
           startTime: format(i.timestampt),
@@ -61,10 +66,10 @@ const generateCaptionFiles = async (browser, cidList) => {
         }))
         .forEach(i => {
           // remove old version of caption file
-          if (currentCaptionsList.includes(`${__dirname}/${title}.sbv`)) {
-            fs.unlinkSync(`${__dirname}/${title}.sbv`);
+          if (currentCaptionsList.includes(`${directoryName}/${title}.sbv`)) {
+            fs.unlinkSync(`${directoryName}/${title}.sbv`);
           }
-          fs.appendFileSync(`${__dirname}/${title}.sbv`, `${i.startTime},${i.stopTime}\n${i.value}\n\n`);
+          fs.appendFileSync(`${directoryName}/${title}.sbv`, `${i.startTime},${i.stopTime}\n${i.value}\n\n`);
         });
     }
   } catch (err) {
@@ -77,8 +82,6 @@ const generateCaptionFiles = async (browser, cidList) => {
   // add { headless: false } in launch method for debug purpose
   const browser = await puppeteer.launch();
   try {
-    const aidList = [23430199, 24335656, 24030433];
-
     for (const aid of aidList) {
       const tab = await browser.newPage();
       const response = await tab.goto(`https://api.bilibili.com/x/web-interface/view?aid=${aid}`);

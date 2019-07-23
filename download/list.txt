@@ -1,6 +1,0 @@
-# ffmpeg -f concat -safe 0 -i list.txt -c copy abc.flv
-# bilibili-get/youtubedl
-file 'abc_part1.flv'
-file 'abc_part2.flv'
-file 'abc_part3.flv'
-file 'abc_part4.flv'

@@ -1,4 +1,6 @@
 node_modules
+download/*
+captions/*
 *.flv
 *.mp4
 *.avi
